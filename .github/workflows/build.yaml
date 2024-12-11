@@ -1,0 +1,68 @@
+name: Docker rsync
+on:
+    push:
+        branches: [ "master" ]
+        tags: ['*.*.*']
+
+jobs:
+    test-dockerfile:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+            - uses: hadolint/hadolint-action@v3.1.0
+              with:
+                  ignore: DL3008,DL3018,SC2086,DL3033,DL3006
+                  dockerfile: ./Dockerfile
+
+    build:
+        needs:
+            - test-dockerfile
+
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+            # This is used to complete the identity challenge
+            # with sigstore/fulcio when running outside of PRs.
+            id-token: write
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Set release version
+              run: |
+                  if [[ "${GITHUB_REF}" == "refs/heads/master" ]]; then
+                    echo "RELEASE_VERSION=latest" >> $GITHUB_ENV
+                  elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+                    echo "RELEASE_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+                  else
+                    echo "This workflow should only run on a tag or the master branch."
+                    exit 1
+                  fi
+
+            - name: Log in to Docker Hub
+              uses: docker/login-action@v3
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            # Extract metadata (tags, labels) for Docker
+            # https://github.com/docker/metadata-action
+            - name: Extract metadata (tags, labels) for Docker
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                  images: ghcr.io/oxcom/llvm-spam-detector
+
+#            - name: Build and push Docker image
+#              id: push
+#              uses: docker/build-push-action@v6
+#              with:
+#                  context: .
+#                  file: ./Dockerfile
+#                  push: true
+#                  tags: ghcr.io/oxcom/llvm-spam-detector:${{ env.RELEASE_VERSION }}
+#                  labels: ${{ steps.meta.outputs.labels }}
