@@ -17,8 +17,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./src/app.py ./src/gunicorn_config.py ./
 
-RUN python app.py
+# RUN python app.py
 
 EXPOSE 80
 
-CMD ["gunicorn","--config", "gunicorn_config.py", "app:app"]
+CMD ["gunicorn", "--config", "gunicorn_config.py", "app:app"]
