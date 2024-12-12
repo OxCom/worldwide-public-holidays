@@ -55,14 +55,14 @@ jobs:
               id: meta
               uses: docker/metadata-action@v5
               with:
-                  images: ghcr.io/oxcom/llvm-spam-detector
+                  images: ghcr.io/oxcom/worldwide-public-holidays
 
-#            - name: Build and push Docker image
-#              id: push
-#              uses: docker/build-push-action@v6
-#              with:
-#                  context: .
-#                  file: ./Dockerfile
-#                  push: true
-#                  tags: ghcr.io/oxcom/llvm-spam-detector:${{ env.RELEASE_VERSION }}
-#                  labels: ${{ steps.meta.outputs.labels }}
+            - name: Build and push Docker image
+              id: push
+              uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  file: ./Dockerfile
+                  push: true
+                  tags: ghcr.io/oxcom/worldwide-public-holidays:${{ env.RELEASE_VERSION }}
+                  labels: ${{ steps.meta.outputs.labels }}
