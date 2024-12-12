@@ -14,8 +14,9 @@ def hello_world():
 @app.route('/holidays', methods=['GET'])
 def country_holidays():
     current_year = datetime.now().year
-    country = request.args.get('country', 'DE')
     year = request.args.get('year', str(current_year))
+    country = request.args.get('country', 'DE')
+    state = request.args.get('state')
 
     # Validate country (2-character ISO code)
     if not country.isalpha() or len(country) != 2:
@@ -27,7 +28,12 @@ def country_holidays():
 
     try:
         year = int(year)
-        hList = holidays.country_holidays(country, years=year)
+
+        if state:
+            hList = holidays.country_holidays(country.upper(), years=year, subdiv=state)
+        else:
+            hList = holidays.country_holidays(country.upper(), years=year)
+
         jList = [{"date": str(holiday), "name": name} for holiday, name in hList.items()]
 
         return jsonify({"holidays": jList})
