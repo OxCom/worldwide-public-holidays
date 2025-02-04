@@ -7,7 +7,7 @@ def run_server():
     port = int(os.environ.get("PORT", "8080"))
     workers = int(os.environ.get('SERVER_PROCESSES', '2'))
     # critical|error|warning|info|debug|trace
-    log_level = os.environ.get('LOG_LEVEL', 'debug')
+    log_level = os.environ.get('LOG_LEVEL', 'info')
 
     log_config = uvicorn.config.LOGGING_CONFIG
     log_config["formatters"]["access"]["fmt"] = (
