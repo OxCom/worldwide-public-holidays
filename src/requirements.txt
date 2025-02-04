@@ -1,3 +1,4 @@
-flask
+fastapi
 holidays
-gunicorn
+uvicorn
+asyncio

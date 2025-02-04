@@ -1,0 +1,20 @@
+services:
+    frontend:
+        restart: unless-stopped
+        build:
+            context: .
+            dockerfile: Dockerfile
+        environment:
+            - WDS_SOCKET_PORT=0
+        ports:
+          - 8080:8080
+        volumes:
+            - application:/opt/app
+
+volumes:
+    application:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: ./src

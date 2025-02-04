@@ -1,5 +1,9 @@
 FROM python:3-slim
 
+# Configure Python to not buffer "stdout" or create .pyc files
+ENV PYTHONBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
 WORKDIR /opt/app
 
 # in case when your company has self signed certifiacte to decription SSL traffic
@@ -15,10 +19,8 @@ WORKDIR /opt/app
 COPY ./src/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./src/app.py ./src/gunicorn_config.py ./
+COPY ./src /opt/app
 
-# RUN python app.py
+EXPOSE 8080
 
-EXPOSE 80
-
-CMD ["gunicorn", "--config", "gunicorn_config.py", "app:app"]
+CMD ["python", "-m", "main"]

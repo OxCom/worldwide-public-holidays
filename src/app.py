@@ -1,47 +1,34 @@
-import holidays
+import logging
+from fastapi import FastAPI, HTTPException, Query
+from typing import Optional
 from datetime import datetime
-from flask import request
-from flask import Flask, jsonify
+import holidays
 
-app = Flask(__name__)
+app = FastAPI(title="Holidays API")
+logger = logging.getLogger('uvicorn.error')
 
-
-@app.route('/')
-def hello_world():
+@app.get("/")
+async def hello_world():
     return {"message": "Welcome to the Holidays API!"}
 
 
-@app.route('/holidays', methods=['GET'])
-def country_holidays():
-    current_year = datetime.now().year
-    year = request.args.get('year', str(current_year))
-    country = request.args.get('country', 'DE')
-    state = request.args.get('state')
-
-    # Validate country (2-character ISO code)
-    if not country.isalpha() or len(country) != 2:
-        return jsonify({"error": "Invalid country code. It must be a 2-character alphabetic ISO code."}), 400
-
-    # Validate year (numeric)
-    if not year.isdigit():
-        return jsonify({"error": "Invalid year. It must be a numeric value."}), 400
+@app.get("/holidays")
+async def country_holidays(
+        year: Optional[int] = Query(default=datetime.now().year, ge=1),
+        country: str = Query(default="DE", pattern=r'^[A-Za-z]{2}$'),
+        state: Optional[str] = Query(default=''),
+        lang: str = Query(default="EN", pattern=r'^[A-Za-z]{2}$'),
+):
+    logger.debug(f"GET /holidays year={year}, country={country}, state={state}, lang={lang}")
 
     try:
-        year = int(year)
+        h_list = holidays.country_holidays(country.upper(), years=year, subdiv=state.upper(), language=lang.upper())
 
-        if state:
-            hList = holidays.country_holidays(country.upper(), years=year, subdiv=state)
-        else:
-            hList = holidays.country_holidays(country.upper(), years=year)
+        holidays_list = [{"date": str(holiday), "name": name} for holiday, name in h_list.items()]
 
-        jList = [{"date": str(holiday), "name": name} for holiday, name in hList.items()]
-
-        return jsonify({"holidays": jList})
+        return holidays_list
     except KeyError:
-        return jsonify({"error": f"Country code '{country}' is not supported."}), 400
+        raise HTTPException(status_code=400, detail=f"Country code '{country}' is not supported.")
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
+        logger.error(f"Unable to handle request: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
