@@ -16,7 +16,7 @@ WORKDIR /opt/app
 # container
 # COPY .docker/pip.conf /root/.pip/pip.conf
 
-COPY ./src/requirements.txt ./
+COPY src/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./src /opt/app
