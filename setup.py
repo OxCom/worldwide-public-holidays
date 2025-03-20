@@ -6,7 +6,7 @@ setup(
     description='API to fetch list of public holidays',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/OxCom/wwph',
+    url='https://github.com/OxCom/worldwide-public-holidays',
     packages=find_packages(where='src'),
     package_dir={'': 'src'},
     install_requires=[
